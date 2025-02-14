@@ -19,7 +19,8 @@ const initialState={
             state.userInfo =action.payload.user
             state.token=action.payload.token
             state.isAuthenticated =true
-            localStorage.setItem("token",action.payload.token)
+            // localStorage.setItem("token",action.payload.token)
+             localStorage.setItem("userInfo", JSON.stringify(action.payload));
         },
         LogOut:(state)=>{{
          state.userInfo=null

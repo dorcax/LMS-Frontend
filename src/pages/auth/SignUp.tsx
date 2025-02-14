@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import DatePicker from "@/components/ui/DatePicker";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Link, useNavigate } from "react-router-dom";
 
 import * as yup from "yup";
 
@@ -16,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRegisterUserMutation } from "@/slices/userSlice";
+import { toast } from "react-toastify";
 
 enum GenderEnum {
   MALE = "MALE",
@@ -28,7 +30,7 @@ type FormValue = {
   email: string;
   matricNo: string;
   password: string;
-  dob: Date ;
+  dob: Date;
   address: string;
   phoneNumber: string;
   sex: GenderEnum;
@@ -43,12 +45,12 @@ const schema = yup.object({
   matricNo: yup.string().required("Matric No is required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .required(),
+    .min(6, "Password must be at least 6 characters").required(),
   dob: yup
     .date()
     .typeError("Invalid date")
     .required("Date of birth is required"),
+
   address: yup.string().required("Address is required"),
   phoneNumber: yup.string().min(11, "Invalid phone number").required(),
   sex: yup
@@ -74,39 +76,44 @@ const SignUp = () => {
       // dob: new Date(), // Default to today's date
       address: "",
       phoneNumber: "",
-      sex:undefined, // Default gender
+      sex: undefined, // Default gender
     },
   });
   const [registerUser, { isLoading: loading }] = useRegisterUserMutation();
-
+   const navigate =useNavigate()
   // onsubmit
   const onSubmit = async (value: FormValue) => {
     try {
-      const formattedData ={
+      const formattedData = {
         ...value,
-        dob:new Date(value.dob).toISOString()
-      }
-     console.log("Submitting Form Data:",formattedData);
+        dob: new Date(value.dob).toISOString(),
+      };
+      console.log("Submitting Form Data:", formattedData);
       const response = await registerUser(formattedData).unwrap();
       console.log("response", response);
-    } catch (error) {
+      toast.success("Registration successful! 🎉");
+      navigate("/sign-in")
+    } catch (error:any) {
       console.log(error);
+      toast.error(error.data.message)
     }
   };
 
   return (
     <div className="bg-[#F8F9FA] w-full flex justify-center items-center p-6 min-h-screen border text-[#212529]">
-      <div className=" bg-white w-full  flex  justify-center gap-4  overflow-hidden shadow-lg rounded-lg  max-w-4xl">
+      <div className=" bg-white w-full  flex  justify-center gap-4  overflow-hidden shadow-lg rounded-lg  max-w-3xl">
         <div className="md:w-1/2">
           <img
             src="./img/bg-img.jpg"
             alt=""
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-r-2xl"
           />
         </div>
         <div className="flex flex-col md:w-1/2 py-14 ">
           <div className="text-center">
-            <h2 className="text-green-600 uppercase ">SignUp</h2>
+            <h2 className="text-black text-2xl capitalize font-semibold ">
+              Sign Up
+            </h2>
             <p>pls fill in the information to proceed</p>
           </div>
           <form action="w-1/2 " onSubmit={handleSubmit(onSubmit)}>
@@ -190,7 +197,7 @@ const SignUp = () => {
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    selected={field.value && new Date(field.value) }
+                    selected={field.value && new Date(field.value)}
                     onChange={(date) => field.onChange(date?.toISOString())}
                     className="w-full max-w-sm my-1"
                   />
@@ -241,12 +248,21 @@ const SignUp = () => {
             </div>
             <div className="px-2 py-6">
               <Button
-                className=" w-full max-w-sm capitalize"
-                disabled={isLoading}
+                className=" w-full max-w-sm capitalize bg-[#1976D2] text-md hover:bg-[#1976d2c4]"
+                disabled={loading}
               >
-                sign up
+                {loading && (
+                  <span className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                )}
+                {loading ? "loading" : " sign up"}
               </Button>
             </div>
+            <p className="text-center text-md ">
+              Already have an account?{" "}
+              <span className="text-[#1976D2]">
+                <Link to="/sign-in">sign in</Link>
+              </span>
+            </p>
           </form>
         </div>
       </div>
